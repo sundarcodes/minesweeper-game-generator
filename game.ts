@@ -16,6 +16,7 @@ export class Game {
     }
 
     openCell(row: number, col: number) {
+        let retVal = 0;
         if (this.isGameOver) {
             return;
         }
@@ -24,14 +25,15 @@ export class Game {
             const grid: Grid = new Grid(this.difficultyLevel.maxRows(), this.difficultyLevel.maxCols());
             this.grid = this.difficultyLevel.openFirstCell(grid, row, col);
         } else {
-            const result = this.grid.openCell(row, col);
-            if (result === -1) {
+            retVal = this.grid.openCell(row, col);
+            if (retVal === -1) {
                 console.log('Game over !! You busted a mine');
                 console.log(`The mine was at the position ${row}, ${col}`);
                 this.isGameOver = true;
             }
         }
         this.movesCount++;
+        return retVal;
     }
     setDifficulty(level: GameLevel) {
         switch (level) {
@@ -55,6 +57,7 @@ export class Game {
     }
 
     displayNakedGrid() {
+        console.log(`Total moves was ${this.movesCount}`);
         this.grid.printNakedGrid();
     }
 }
