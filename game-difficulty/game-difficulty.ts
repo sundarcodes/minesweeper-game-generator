@@ -7,5 +7,7 @@ export enum GameLevel {
 }
 
 export interface GameDifficuty {
-    openFirstCell(row: number, col: number): Grid;
+    openFirstCell(grid: Grid, row: number, col: number): Grid;
+    maxRows(): number;
+    maxCols(): number;
 }

@@ -6,19 +6,32 @@ export class Game {
     private movesCount: number;
     private difficultyLevel: GameDifficuty;
     private grid: Grid;
+    private isGameOver: boolean;
     constructor() {
         this.movesCount = 0;
+        this.isGameOver = false;
     }
     reset() {
         this.movesCount = 0;
     }
 
     openCell(row: number, col: number) {
-        if (this.movesCount === 0) {
-            this.grid = this.difficultyLevel.openFirstCell(row, col);
-        } else {
-            
+        if (this.isGameOver) {
+            return;
         }
+        if (this.movesCount === 0) {
+            // Create the grid here
+            const grid: Grid = new Grid(this.difficultyLevel.maxRows(), this.difficultyLevel.maxCols());
+            this.grid = this.difficultyLevel.openFirstCell(grid, row, col);
+        } else {
+            const result = this.grid.openCell(row, col);
+            if (result === -1) {
+                console.log('Game over !! You busted a mine');
+                console.log(`The mine was at the position ${row}, ${col}`);
+                this.isGameOver = true;
+            }
+        }
+        this.movesCount++;
     }
     setDifficulty(level: GameLevel) {
         switch (level) {
@@ -39,5 +52,9 @@ export class Game {
 
     displayGrid() {
         this.grid.printGrid();
+    }
+
+    displayNakedGrid() {
+        this.grid.printNakedGrid();
     }
 }

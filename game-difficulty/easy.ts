@@ -5,14 +5,13 @@ const MAX_ROWS = 10;
 const MAX_COLS = 10;
 const MAX_MINES = 10;
 export class EasyLevel implements GameDifficuty {
-    openFirstCell(row: number, col: number): Grid {
-        const grid = this.placeMines(row, col);
-        grid.updateMineInfo();
-        return grid;
+    openFirstCell(grid: Grid, row: number, col: number): Grid {
+        const newGrid = this.placeMines(grid, row, col);
+        newGrid.updateMineInfo();
+        return newGrid;
     }
 
-    placeMines(rowNumClicked: number, colNumClicked: number): Grid {
-        const grid: Grid = new Grid(MAX_ROWS, MAX_COLS);
+    placeMines(grid: Grid, rowNumClicked: number, colNumClicked: number): Grid {
         let numberOfMinesPlaced = 0;
         while (numberOfMinesPlaced < MAX_MINES) {
             const colNumToBePlaced = Math.floor(Math.random() * MAX_COLS);
@@ -25,5 +24,12 @@ export class EasyLevel implements GameDifficuty {
             numberOfMinesPlaced++;
         }
         return grid;
+    }
+
+    maxRows(): number {
+        return MAX_ROWS;
+    }
+    maxCols(): number {
+        return MAX_COLS;
     }
 }

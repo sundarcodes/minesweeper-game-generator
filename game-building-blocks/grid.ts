@@ -23,9 +23,14 @@ export class Grid {
         // Check if the cell is a mine
         // If mine, you are a gonner
         // Else, open the cell and display/return the value
+        const cell = this.grid[row][col];
+        if (cell.isContentAMine()) {
+            return -1;
+        } else {
+            cell.openCell();
+            return 0;
+        }
     }
-
-    // setCell
 
     isCellAMine(row: number, col: number) {
         return this.grid[row][col].isContentAMine();
@@ -72,7 +77,19 @@ export class Grid {
 
     printGrid() {
         this.grid.forEach(row => {
-            console.log(row.map(cell => cell.content).join(' ').replace(/-1/g,'*'));
+            console.log(row.map(cell => {
+                if (cell.isCellOpened()) {
+                    return cell.content;
+                } else {
+                    return '-'
+                }
+            }).join(' ').replace(/-1/g,'*'));
         });
+        console.log('');
+    }
+
+    printNakedGrid() {
+        const str = this.grid.map(row => row.map(cell => cell.content).join(' ').replace(/-1/g,'*')).join('\n');
+        console.log(str);
     }
 }

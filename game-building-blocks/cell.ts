@@ -24,6 +24,10 @@ export class Cell {
         return this.isOpened;
     }
 
+    openCell() {
+        this.isOpened = true;
+    }
+
     setContentAsMine() {
         this._content = -1;
         this.isMine = true;
