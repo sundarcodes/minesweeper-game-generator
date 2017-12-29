@@ -1,0 +1,20 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "Program to generate minesweeper game board",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node build/main.js"
+  },
+  "keywords": [
+    "minesweeper",
+    "typescript"
+  ],
+  "author": "Sundar",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^2.6.2"
+  }
+}

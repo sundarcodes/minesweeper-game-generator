@@ -3,7 +3,7 @@ import { GameDifficuty, GameLevel } from './game-difficulty/game-difficulty';
 import { EasyLevel } from './game-difficulty/easy';
 
 export class Game {
-    private movesCount;
+    private movesCount: number;
     private difficultyLevel: GameDifficuty;
     private grid: Grid;
     constructor() {
