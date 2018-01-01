@@ -1,35 +1,26 @@
-import { GameDifficuty } from './game-difficulty';
-import { Grid } from '../game-building-blocks/grid';
-import { Cell } from '../game-building-blocks/cell';
-const MAX_ROWS = 10;
-const MAX_COLS = 10;
-const MAX_MINES = 10;
-export class EasyLevel implements GameDifficuty {
-    openFirstCell(grid: Grid, row: number, col: number): Grid {
-        const newGrid = this.placeMines(grid, row, col);
-        newGrid.updateMineInfo();
-        return newGrid;
-    }
+import gridUtil, { Grid } from '../game-building-blocks/grid';
 
-    placeMines(grid: Grid, rowNumClicked: number, colNumClicked: number): Grid {
-        let numberOfMinesPlaced = 0;
-        while (numberOfMinesPlaced < MAX_MINES) {
-            const colNumToBePlaced = Math.floor(Math.random() * MAX_COLS);
-            const rowNumToBePlaced = Math.floor(Math.random() * MAX_ROWS);
-            if (grid.isCellAMine(rowNumToBePlaced, colNumToBePlaced) ||
-                (rowNumClicked === rowNumToBePlaced && colNumClicked === colNumToBePlaced)) {
-                continue;
-            }
-            grid.markCellAsMine(rowNumToBePlaced, colNumToBePlaced);
-            numberOfMinesPlaced++;
+export const MAX_ROWS = 10;
+export const MAX_COLS = 10;
+export const MAX_MINES = 10;
+
+export function openFirstCell(grid: Grid, row: number, col: number): Grid {
+    const newGrid = placeMines(grid, row, col);
+    return gridUtil.updateMineInfo(newGrid);
+}
+
+function placeMines(grid: Grid, rowNumClicked: number, colNumClicked: number): Grid {
+    let numberOfMinesPlaced = 0;
+    let newGrid = grid;
+    while (numberOfMinesPlaced < MAX_MINES) {
+        const colNumToBePlaced = Math.floor(Math.random() * MAX_COLS);
+        const rowNumToBePlaced = Math.floor(Math.random() * MAX_ROWS);
+        if (gridUtil.isCellAMine(grid, rowNumToBePlaced, colNumToBePlaced) ||
+            (rowNumClicked === rowNumToBePlaced && colNumClicked === colNumToBePlaced)) {
+            continue;
         }
-        return grid;
+        newGrid = gridUtil.markCellAsMine(grid, rowNumToBePlaced, colNumToBePlaced);
+        numberOfMinesPlaced++;
     }
-
-    maxRows(): number {
-        return MAX_ROWS;
-    }
-    maxCols(): number {
-        return MAX_COLS;
-    }
+    return newGrid;
 }

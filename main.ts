@@ -1,11 +1,15 @@
 import { GameLevel } from './game-difficulty/game-difficulty';
-import { Game } from './game';
+import game from './game';
+
+import * as R from 'ramda';
 
 // Create a Game Object
-const mineSweeper = new Game();
-mineSweeper.setDifficulty(GameLevel.Easy);
-mineSweeper.openCell(5, 4);
-mineSweeper.displayGrid();
+const initialGameState = game.initGame(GameLevel.Easy);
+const state = game.openCell(initialGameState, 5 ,4);
+game.displayGrid(state.grid);
+game.displaySolvedGrid(state.grid);
+// R.pipe()
+
 
 
 // Randomly open some cells
@@ -17,8 +21,8 @@ mineSweeper.displayGrid();
 // }
 
 // Keep playing till you get busted
-while(mineSweeper.openCell(Math.floor(Math.random()*8), Math.floor(Math.random()*9)) != -1) {
-    mineSweeper.displayGrid();
-}
+// while(mineSweeper.openCell(Math.floor(Math.random()*8), Math.floor(Math.random()*9)) != -1) {
+//     mineSweeper.displayGrid();
+// }
 
-mineSweeper.displayNakedGrid();
+// mineSweeper.displayNakedGrid();

@@ -1,63 +1,95 @@
-import { Grid } from './game-building-blocks/grid';
-import { GameDifficuty, GameLevel } from './game-difficulty/game-difficulty';
-import { EasyLevel } from './game-difficulty/easy';
+import gridUtil, { Grid } from './game-building-blocks/grid';
+import { GameLevel } from './game-difficulty/game-difficulty';
+import {
+    openFirstCell as easyLevel, MAX_COLS as MAX_COLS_FOR_EASY,
+    MAX_ROWS as MAX_ROWS_FOR_EASY
+} from './game-difficulty/easy';
 
-export class Game {
-    private movesCount: number;
-    private difficultyLevel: GameDifficuty;
-    private grid: Grid;
-    private isGameOver: boolean;
-    constructor() {
-        this.movesCount = 0;
-        this.isGameOver = false;
-    }
-    reset() {
-        this.movesCount = 0;
-    }
+import * as R from 'ramda';
 
-    openCell(row: number, col: number) {
-        let retVal = 0;
-        if (this.isGameOver) {
-            return;
-        }
-        if (this.movesCount === 0) {
-            // Create the grid here
-            const grid: Grid = new Grid(this.difficultyLevel.maxRows(), this.difficultyLevel.maxCols());
-            this.grid = this.difficultyLevel.openFirstCell(grid, row, col);
-        } else {
-            retVal = this.grid.openCell(row, col);
-            if (retVal === -1) {
-                console.log('Game over !! You busted a mine');
-                console.log(`The mine was at the position ${row}, ${col}`);
-                this.isGameOver = true;
-            }
-        }
-        this.movesCount++;
-        return retVal;
-    }
-    setDifficulty(level: GameLevel) {
-        switch (level) {
-            case GameLevel.Easy:
-                this.difficultyLevel = new EasyLevel();
-                break;
-            case GameLevel.Intermediate:
-                // Create Intermediate Level
-                break;
-            case GameLevel.Tough:
-                // Create Tough Level
-                break;
-            default:
-                console.log('Level not supported');
-                break;
-        }
-    }
+export interface GameState {
+    movesCount: number;
+    grid: Grid;
+    isGameOver: boolean;
+    difficultyLevel: GameLevel;
+}
 
-    displayGrid() {
-        this.grid.printGrid();
+const initGame = (difficultyLevel: GameLevel): GameState => {
+    let grid: Grid = [];
+    switch (difficultyLevel) {
+        case GameLevel.Easy:
+            grid = gridUtil.createGrid(MAX_ROWS_FOR_EASY, MAX_COLS_FOR_EASY);
+            break;
+        case GameLevel.Intermediate:
+            // Create Intermediate Level
+            break;
+        case GameLevel.Tough:
+            // Create Tough Level
+            break;
+        default:
+            console.log('Level not supported');
+            break;
     }
+    return {
+        movesCount: 0,
+        grid,
+        isGameOver: false,
+        difficultyLevel
+    }
+}
 
-    displayNakedGrid() {
-        console.log(`Total moves was ${this.movesCount}`);
-        this.grid.printNakedGrid();
+const displayGrid = (grid: Grid) => console.log(gridUtil.prettyFormatGrid(grid));
+
+const displaySolvedGrid = (grid: Grid) => console.log(gridUtil.prettyFormatNakedGrid(grid));
+
+const openCell = (gameState: GameState, row: number, col: number): GameState => {
+    let newGrid: Grid = [];
+    let newState: GameState;
+    // Check if this is first cell being opened
+    if (gameState.movesCount === 0) {
+        newGrid = openFirstCell(gameState, row, col);
+        newState = R.merge(gameState, { grid: newGrid});
+    } else {
+        newState = openSubsequentCell(gameState, row, col);
     }
+    return newState;
+}
+
+const openSubsequentCell = (gameState: GameState, row: number, col: number): GameState => {
+    let newState: GameState;
+    let newGrid: Grid = [];
+    // Check if cell to be opened is a mine
+    if (gridUtil.isCellAMine(gameState.grid, row, col)) {
+        newState = R.merge(gameState, {isGameOver: true});
+    } else {
+        newGrid = gridUtil.openCell(gameState.grid, row, col);
+        newState = R.merge(gameState, { grid: newGrid});
+    }
+    return newState;
+}
+
+const openFirstCell = (gameState: GameState, row: number, col: number): Grid => {
+    let grid: Grid = gameState.grid;
+    switch (gameState.difficultyLevel) {
+        case GameLevel.Easy:
+            grid = easyLevel(gameState.grid, row, col);
+            break;
+        case GameLevel.Intermediate:
+            // Create Intermediate Level
+            break;
+        case GameLevel.Tough:
+            // Create Tough Level
+            break;
+        default:
+            console.log('Level not supported');
+            break;
+    }
+    return grid;
+}
+
+export default {
+    initGame,
+    displayGrid,
+    displaySolvedGrid,
+    openCell
 }

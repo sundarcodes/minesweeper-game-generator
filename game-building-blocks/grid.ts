@@ -1,95 +1,89 @@
 import { Cell } from "./cell";
 
+import * as R from 'ramda';
 
-export class Grid {
-    grid: Cell[][];
-    constructor(private maxRow: number, private maxColumn: number) {
-        this.grid = [];
-        for(let row = 0; row < maxRow; row++) {
-            const colsArray = [];
-            for(let col = 0; col < maxColumn; col++) {
-                colsArray.push(new Cell(row, col));
+export type Grid = Array<Array<Cell>>;
+// Operations that could be performed on the grid
+
+const createGrid = (maxRows: number, maxColumns: number): Grid => {
+    const grid: Array<Array<Cell>> = [];
+    R.range(0, maxRows).forEach(row => {
+        grid.push(R.range(0, maxColumns).map(col => {
+            return {
+                numberOfAdjacentMines: -1,
+                isMine: false,
+                isOpened: false
             }
-            this.grid.push(colsArray);
-        }
-    }
+        }));
+    })
+    return grid;
+}
 
-    markCellAsMine(row: number, col: number) {
-        const cell = this.grid[row][col];
-        cell.setContentAsMine();
-    }
+const markCellAsMine = (grid: Grid, row: number, col: number): Grid => {
+    const cellPath = R.lensPath([row, col, 'isMine']);
+    return R.set(cellPath, true, grid);
+}
 
-    openCell(row: number, col: number) {
-        // Check if the cell is a mine
-        // If mine, you are a gonner
-        // Else, open the cell and display/return the value
-        const cell = this.grid[row][col];
-        if (cell.isContentAMine()) {
-            return -1;
-        } else {
-            cell.openCell();
-            return 0;
-        }
-    }
+const isCellAMine = (grid: Grid, row: number, col: number): boolean => {
+    const cellPath = R.lensPath([row, col, 'isMine']);
+    return R.view(cellPath, grid);
+}
 
-    isCellAMine(row: number, col: number) {
-        return this.grid[row][col].isContentAMine();
-    }
+const openCell = (grid: Grid, row: number, col: number): Grid => {
+    // Mark the cell as open
+    const cellPath = R.lensPath([row, col, 'isOpen']);
+    return R.set(cellPath, true, grid);
+}
 
-    updateMineInfo() {
-        // Go over the entire cells and mark 
-        // cells with mine value indicators
-        for (let row = 0; row < this.maxRow; row++) {
-            for (let col = 0; col < this.maxColumn; col++) {
-                // Continue if current cell is a mine
-                // If not, compute the mines in adjacent cells and update the value
-                const currentCell = this.grid[row][col];
-                if (currentCell.isContentAMine()) {
-                    continue;
-                }
-                const numberOfMines = this.getMinesCountForCell(row, col);
-                currentCell.content = numberOfMines;
-            }
-        }
-    }
-
-    getMinesCountForCell(row: number, col: number): number {
-        // Check Left  
-        let minesCount = 0;
-        for (let i = row - 1; i <= row + 1; i++) {
-            for (let j = col - 1; j <= col + 1; j++) {
-                if (i < 0 || j < 0 || i >= this.maxRow || j >= this.maxColumn) {
-                    continue;
-                }
-                const cell = this.grid[i][j];
-                // Skip when cell is undefined
-                // or is the cell to get the count for
-                // or cell content is not a mine
-                if (!cell || (i === row && j === col) ||
-                    !cell.isContentAMine()) {
-                    continue;
-                }
-                minesCount++;
-            }
-        }
-        return minesCount;
-    }
-
-    printGrid() {
-        this.grid.forEach(row => {
-            console.log(row.map(cell => {
-                if (cell.isCellOpened()) {
-                    return cell.content;
-                } else {
-                    return '-'
-                }
-            }).join(' ').replace(/-1/g,'*'));
+const updateMineInfo = (grid: Grid): Grid => {
+    let newGrid = grid;
+    grid.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+            const cellPath = R.lensPath([rowIndex, colIndex, 'numberOfAdjacentMines'])
+            newGrid = R.set(cellPath,
+                getAdjacentMinesCount.call(null, grid, rowIndex, colIndex), newGrid);
         });
-        console.log('');
-    }
+    });
+    return newGrid;
+}
 
-    printNakedGrid() {
-        const str = this.grid.map(row => row.map(cell => cell.content).join(' ').replace(/-1/g,'*')).join('\n');
-        console.log(str);
-    }
+const getAdjacentMinesCount = (grid: Grid, row: number, col: number): number => {
+    let minesCount = 0;
+    R.range(row - 1, row + 1).forEach(rowIndex => {
+        R.range(col - 1, col + 1).forEach(colIndex => {
+            if (rowIndex < 0 || colIndex < 0 || rowIndex >= grid.length || colIndex >= grid[0].length) {
+                return;
+            }
+            const cell = grid[rowIndex][colIndex];
+            if (cell.isMine || (rowIndex === row && colIndex === col)) {
+                return;
+            }
+            minesCount++;
+        })
+    });
+    return minesCount;
+}
+
+const prettyFormatGrid = (grid: Grid): string => {
+    return grid.map(row => row.map(cell => cell.numberOfAdjacentMines)
+        .join(' ')
+        .replace(/-1/g, '*'))
+        .join('\n');
+}
+
+const prettyFormatNakedGrid = (grid: Grid): string => {
+    return grid.map(row => row.map(cell => cell.isOpened ? cell.numberOfAdjacentMines : '-')
+        .join(' ')
+        .replace(/-1/g, '*'))
+        .join('\n');
+}
+
+export default {
+    createGrid,
+    markCellAsMine,
+    prettyFormatGrid,
+    prettyFormatNakedGrid,
+    openCell,
+    updateMineInfo,
+    isCellAMine
 }
